@@ -14,7 +14,9 @@ jobs:
           
 
       - name: Install Dependencies
-        run: pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu datasets pillow
+        run: |  
+          pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu 
+          pip install datasets  pillow --index-url https://pypi.org
 
       - name: Extract Knowledge
         run: python step1_knowledge.py
