@@ -1,0 +1,31 @@
+name: "Step 1: Extract Teacher Knowledge"
+on:
+  workflow_dispatch:
+
+jobs:
+  knowledge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu datasets pillow
+
+      - name: Extract Knowledge
+        run: python step1_knowledge.py
+
+      - name: Save Knowledge (Cache)
+        uses: actions/cache/save@v4
+        with:
+          path: output/soft_labels.pt
+          key: soft-labels-v1
+
+      - name: Cleanup Giant Files (Saves Storage)
+        run: |
+          rm -rf nanoVLM
+          rm -rf output/soft_labels.pt
