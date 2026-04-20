@@ -1,4 +1,4 @@
-import os, gc
+import os, gc, shutil
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 import torch
 from torchvision import transforms
@@ -9,10 +9,15 @@ SAVE_DIR = "./output"
 os.makedirs(SAVE_DIR, exist_ok=True)
 SOFT_PATH = f"{SAVE_DIR}/soft_labels.pt"
 
-print("Downloading TrashNet dataset (fetool mirror)...")
-# Using fetool mirror because garythung is currently broken on HuggingFace
-dataset = load_dataset("fetool/dataset-trashnet")
-# This dataset only has a 'train' split, so we split it 80/20 manually
+print("Cloning TrashNet from GitHub...")
+os.system("git clone https://github.com/garythung/trashnet.git trashnet_repo")
+
+print("Unzipping images...")
+os.makedirs("trashnet_unzipped", exist_ok=True)
+os.system("unzip -q trashnet_repo/data/data-resized.zip -d trashnet_unzipped")
+
+# Load using ImageFolder builder on the unzipped directory
+dataset = load_dataset("imagefolder", data_dir="trashnet_unzipped")
 dataset = dataset['train'].train_test_split(test_size=0.2, seed=42)
 
 raw_t = transforms.Compose([transforms.Resize((224,224)), transforms.ToTensor(), transforms.Normalize([0.485,0.456,0.406],[0.229,0.224,0.225])])
@@ -45,4 +50,7 @@ with torch.no_grad():
 torch.save(soft_label_map, SOFT_PATH)
 print(f"\n✅ Knowledge saved ({os.path.getsize(SOFT_PATH)/1024/1024:.1f} MB)")
 
+# Aggressively delete downloaded images to save GitHub storage limits
+shutil.rmtree("trashnet_repo")
+shutil.rmtree("trashnet_unzipped")
 del dataset, teacher, raw_loader; gc.collect()
