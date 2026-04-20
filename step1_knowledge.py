@@ -9,8 +9,12 @@ SAVE_DIR = "./output"
 os.makedirs(SAVE_DIR, exist_ok=True)
 SOFT_PATH = f"{SAVE_DIR}/soft_labels.pt"
 
-print("Downloading TrashNet dataset...")
-dataset = load_dataset("garythung/trashnet")
+print("Downloading TrashNet dataset (fetool mirror)...")
+# Using fetool mirror because garythung is currently broken on HuggingFace
+dataset = load_dataset("fetool/dataset-trashnet")
+# This dataset only has a 'train' split, so we split it 80/20 manually
+dataset = dataset['train'].train_test_split(test_size=0.2, seed=42)
+
 raw_t = transforms.Compose([transforms.Resize((224,224)), transforms.ToTensor(), transforms.Normalize([0.485,0.456,0.406],[0.229,0.224,0.225])])
 
 class WasteDS(Dataset):
