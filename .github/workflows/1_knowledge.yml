@@ -11,12 +11,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          
+          # Removed cache: 'pip' to prevent index poisoning
 
-      - name: Install Dependencies
-        run: |  
-          pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu 
-          pip install datasets  pillow --index-url https://pypi.org
+      - name: Install PyTorch (CPU)
+        run: pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu
+
+      - name: Install HuggingFace & Pillow
+        run: pip install --no-cache-dir datasets pillow --index-url https://pypi.org/simple/
 
       - name: Extract Knowledge
         run: python step1_knowledge.py
@@ -27,7 +28,7 @@ jobs:
           path: output/soft_labels.pt
           key: soft-labels-v1
 
-      - name: Cleanup Giant Files (Saves Storage)
+      - name: Cleanup Giant Files
         run: |
           rm -rf nanoVLM
           rm -rf output/soft_labels.pt
