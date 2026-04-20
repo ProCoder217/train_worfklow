@@ -16,8 +16,8 @@ print("Unzipping images...")
 os.makedirs("trashnet_unzipped", exist_ok=True)
 os.system("unzip -q trashnet_repo/data/data-resized.zip -d trashnet_unzipped")
 
-# Load using ImageFolder builder on the unzipped directory
-dataset = load_dataset("imagefolder", data_dir="trashnet_unzipped")
+# FIX: Point directly to the 'data' folder inside the unzipped directory
+dataset = load_dataset("imagefolder", data_dir="trashnet_unzipped/data")
 dataset = dataset['train'].train_test_split(test_size=0.2, seed=42)
 
 raw_t = transforms.Compose([transforms.Resize((224,224)), transforms.ToTensor(), transforms.Normalize([0.485,0.456,0.406],[0.229,0.224,0.225])])
